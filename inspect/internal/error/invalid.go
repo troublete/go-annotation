@@ -3,3 +3,5 @@
 // package missing
 
 func Yolo() {}
+
+type Something struct { }

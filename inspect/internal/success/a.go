@@ -2,12 +2,19 @@
 
 package success
 
+import "bytes"
+
 // Comments
 // another line
 // and another
 func TestA() {}
 
-type TestTypeA struct{}
+// Test comment on TestTypeA
+type TestTypeA struct {
+	// Test comment on ValueA
+	ValueA      string `literal:tag,json:something`
+	ComplexType bytes.Buffer
+}
 
 func (ttb TestTypeA) AA()  {}
 func (ttb *TestTypeA) AB() {}

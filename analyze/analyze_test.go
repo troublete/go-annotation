@@ -2,8 +2,9 @@ package analyze
 
 import (
 	"fmt"
-	"github.com/troublete/go-chariot/inspect"
 	"testing"
+
+	"github.com/troublete/go-annotation/inspect"
 )
 
 func Test_ExtractDefinitionsForFunction(t *testing.T) {
@@ -13,7 +14,7 @@ func Test_ExtractDefinitionsForFunction(t *testing.T) {
 			d Definition
 		}{
 			{
-				`chariot.route{some_key_without_value=;something_else={"json":"example"}}`,
+				fmt.Sprintf(`chariot.route {some_key_without_value=%vsomething_else={"json":"example"}}`, Separator),
 				Definition{
 					Identifier: "chariot.route",
 					Arguments: map[string]string{
@@ -23,7 +24,7 @@ func Test_ExtractDefinitionsForFunction(t *testing.T) {
 				},
 			},
 			{
-				`user.custom{test=attribute;test_number=123;}`,
+				fmt.Sprintf(`user.custom{test=attribute%stest_number=123%s}`, Separator, Separator),
 				Definition{
 					Identifier: "user.custom",
 					Arguments: map[string]string{
@@ -32,9 +33,30 @@ func Test_ExtractDefinitionsForFunction(t *testing.T) {
 					},
 				},
 			},
+			{
+				fmt.Sprintf(`user.custom{test="c,s,v"%stest_number=123%s}`, Separator, Separator),
+				Definition{
+					Identifier: "user.custom",
+					Arguments: map[string]string{
+						"test":        "c,s,v",
+						"test_number": "123",
+					},
+				},
+			},
+			{
+				fmt.Sprintf(`implicit_annotation{create%vread%vupdate}`, Separator, Separator),
+				Definition{
+					Identifier: "implicit_annotation",
+					Arguments: map[string]string{
+						"create": TrueString,
+						"read":   TrueString,
+						"update": TrueString,
+					},
+				},
+			},
 		} {
 			t.Run(tc.c, func(t *testing.T) {
-				defs, warnings := ExtractDefinitionsForFunction(inspect.Function{
+				defs, warnings := ExtractDefinitionsOnSpec(inspect.Function{
 					Comments: []string{
 						tc.c,
 					},
@@ -69,20 +91,20 @@ func Test_ExtractDefinitionsForFunction(t *testing.T) {
 				},
 			},
 			{
-				`chariot route{some_key_without_value=;something_else={"json":"example"}}`, // wrong ident
+				`chariot route{some_key_without_value=;something_else={"json":"example"}}`, // wrong identifier
 				[]string{
 					fmt.Sprintf(WarnFormatWrongFormat, `chariot route{some_key_without_value=;something_else={"json":"example"}}`),
 				},
 			},
 			{
-				`chariot_route{some_key_without_value;something_else={"json":"example"}}`, // wrong attribute
+				fmt.Sprintf(`chariot_route{some_key_without_value2=%ssomething_else={"json":"example"}}`, Separator), // wrong attribute
 				[]string{
-					fmt.Sprintf(WarnAttributeWrongFormat, "some_key_without_value"),
+					fmt.Sprintf(WarnAttributeWrongFormat, `some_key_without_value2=,something_else={"json":"example"}`),
 				},
 			},
 		} {
 			t.Run(tc.c, func(t *testing.T) {
-				defs, warnings := ExtractDefinitionsForFunction(inspect.Function{
+				defs, warnings := ExtractDefinitionsOnSpec(inspect.Function{
 					Comments: []string{
 						tc.c,
 					},
@@ -106,7 +128,7 @@ func Test_ExtractDefinitionsForFunction(t *testing.T) {
 	})
 
 	t.Run("empty comments", func(t *testing.T) {
-		defs, err := ExtractDefinitionsForFunction(inspect.Function{}, nil)
+		defs, err := ExtractDefinitionsOnSpec(inspect.Function{}, nil)
 		if err != nil {
 			t.Error("didn't expect error")
 		}
@@ -117,11 +139,11 @@ func Test_ExtractDefinitionsForFunction(t *testing.T) {
 	})
 
 	t.Run("test filter", func(t *testing.T) {
-		defs, err := ExtractDefinitionsForFunction(inspect.Function{
+		defs, err := ExtractDefinitionsOnSpec(inspect.Function{
 			Comments: []string{
 				"comment not matching format",
 			},
-		}, FilterCommentNotInForm())
+		}, FilterCommentNoAnnotation())
 		if err != nil {
 			t.Error("didn't expect error")
 		}

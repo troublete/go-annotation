@@ -1,4 +1,4 @@
-module github.com/troublete/go-chariot
+module github.com/troublete/go-annotation
 
 go 1.22.3
 

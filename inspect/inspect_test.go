@@ -5,6 +5,20 @@ import (
 	"testing"
 )
 
+func Test_FunctionDoc(t *testing.T) {
+	comments := []string{
+		"Test",
+	}
+
+	f := Function{
+		Comments: comments,
+	}
+
+	if strings.Join(comments, "") != strings.Join(f.Doc(), "") {
+		t.Error("expected document returned be same as comments")
+	}
+}
+
 func Test_FunctionListFind(t *testing.T) {
 	t.Run("find successful", func(t *testing.T) {
 		var fl FunctionList
@@ -26,6 +40,32 @@ func Test_FunctionListFind(t *testing.T) {
 
 		f := fl.Find("A")
 		if f != nil {
+			t.Error("expected 'A' not to be found")
+		}
+	})
+}
+
+func Test_TypeListFind(t *testing.T) {
+	t.Run("find successful", func(t *testing.T) {
+		var tl TypeList
+		tl = append(tl, Type{
+			Name: "A",
+		})
+
+		tt := tl.Find("A")
+		if tt == nil {
+			t.Error("expected 'A' to be found")
+		}
+	})
+
+	t.Run("find unsuccessful", func(t *testing.T) {
+		var tl TypeList
+		tl = append(tl, Type{
+			Name: "B",
+		})
+
+		tt := tl.Find("A")
+		if tt != nil {
 			t.Error("expected 'A' not to be found")
 		}
 	})
@@ -153,4 +193,81 @@ func Test_FindAllFunctions(t *testing.T) {
 			t.Error("expected error")
 		}
 	})
+}
+
+func Test_FindAllTypes(t *testing.T) {
+	t.Run("success", func(t *testing.T) {
+		types, err := FindAllTypes("./internal/success")
+		if types == nil {
+			t.Error("expected failed parsing")
+		}
+
+		if err != nil {
+			t.Error("expected error")
+		}
+
+		if len(types[0].Comments) > 0 ||
+			types[0].FilePath != "internal/success/sub/b.go" ||
+			types[0].Name != "TestTypeB" ||
+			types[0].Package != "sub" ||
+			len(types[0].Fields) != 0 {
+			t.Error("TestTypeB failed expectation")
+		}
+
+		if strings.Join(types[1].Comments, "") != "Test comment on TestTypeA" ||
+			types[1].FilePath != "internal/success/a.go" ||
+			types[1].Name != "TestTypeA" ||
+			types[1].Package != "success" ||
+			len(types[1].Fields) != 2 ||
+			strings.Join(types[1].Fields[0].Comments, "") != "Test comment on ValueA" ||
+			types[1].Fields[0].Name != "ValueA" ||
+			types[1].Fields[0].Type != "string" ||
+			types[1].Fields[0].Tags["literal"] != "tag" ||
+			types[1].Fields[0].Tags["json"] != "something" ||
+			strings.Join(types[1].Fields[1].Comments, "") != "" ||
+			types[1].Fields[1].Name != "ComplexType" ||
+			types[1].Fields[1].Type != "bytes.Buffer" ||
+			types[1].Fields[1].Tags != nil {
+			t.Error("TestTypeA failed expectation")
+		}
+	})
+
+	t.Run("error", func(t *testing.T) {
+		types, err := FindAllTypes("./internal/error")
+		if types != nil {
+			t.Error("expected failed parsing")
+		}
+
+		if err == nil {
+			t.Error("expected error")
+		}
+	})
+}
+
+func Test_FieldDoc(t *testing.T) {
+	comments := []string{
+		"Test",
+	}
+
+	f := Field{
+		Comments: comments,
+	}
+
+	if strings.Join(comments, "") != strings.Join(f.Doc(), "") {
+		t.Error("expected document returned be same as comments")
+	}
+}
+
+func Test_TypeDoc(t *testing.T) {
+	comments := []string{
+		"Test",
+	}
+
+	tt := Type{
+		Comments: comments,
+	}
+
+	if strings.Join(comments, "") != strings.Join(tt.Doc(), "") {
+		t.Error("expected document returned be same as comments")
+	}
 }
