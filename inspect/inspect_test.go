@@ -218,7 +218,7 @@ func Test_FindAllTypes(t *testing.T) {
 			types[1].FilePath != "internal/success/a.go" ||
 			types[1].Name != "TestTypeA" ||
 			types[1].Package != "success" ||
-			len(types[1].Fields) != 2 ||
+			len(types[1].Fields) != 3 ||
 			strings.Join(types[1].Fields[0].Comments, "") != "Test comment on ValueA" ||
 			types[1].Fields[0].Name != "ValueA" ||
 			types[1].Fields[0].Type != "string" ||
@@ -227,7 +227,11 @@ func Test_FindAllTypes(t *testing.T) {
 			strings.Join(types[1].Fields[1].Comments, "") != "" ||
 			types[1].Fields[1].Name != "ComplexType" ||
 			types[1].Fields[1].Type != "bytes.Buffer" ||
-			types[1].Fields[1].Tags != nil {
+			types[1].Fields[1].Tags != nil ||
+			strings.Join(types[1].Fields[2].Comments, "") != "" ||
+			types[1].Fields[2].Name != "ComplexTypePointer" ||
+			types[1].Fields[2].Type != "*bytes.Buffer" ||
+			types[1].Fields[2].Tags != nil {
 			t.Error("TestTypeA failed expectation")
 		}
 	})

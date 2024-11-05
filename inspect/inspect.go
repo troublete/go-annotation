@@ -243,6 +243,16 @@ func FindAllTypes(root string) (TypeList, error) {
 														Tags:     tags,
 													})
 												}
+
+												stet, stetok := f.Type.(*ast.StarExpr)
+												if stetok {
+													fields = append(fields, Field{
+														Comments: lines,
+														Name:     f.Names[0].String(),
+														Type:     fmt.Sprintf("*%v.%v", stet.X.(*ast.SelectorExpr).X.(*ast.Ident).Name, stet.X.(*ast.SelectorExpr).Sel.Name),
+														Tags:     tags,
+													})
+												}
 											}
 										}
 									}

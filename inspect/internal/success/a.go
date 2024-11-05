@@ -12,8 +12,9 @@ func TestA() {}
 // Test comment on TestTypeA
 type TestTypeA struct {
 	// Test comment on ValueA
-	ValueA      string `literal:tag,json:something`
-	ComplexType bytes.Buffer
+	ValueA             string `literal:tag,json:something`
+	ComplexType        bytes.Buffer
+	ComplexTypePointer *bytes.Buffer
 }
 
 func (ttb TestTypeA) AA()  {}
