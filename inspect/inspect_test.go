@@ -219,7 +219,7 @@ func Test_FindAllTypes(t *testing.T) {
 			types[1].FilePath != "internal/success/a.go" ||
 			types[1].Name != "TestTypeA" ||
 			types[1].Package != "success" ||
-			len(types[1].Fields) != 5 ||
+			len(types[1].Fields) != 6 ||
 			strings.Join(types[1].Fields[0].Comments, "") != "Test comment on ValueA" ||
 			types[1].Fields[0].Name != "ValueA" ||
 			types[1].Fields[0].Type.String() != "string" ||
@@ -244,7 +244,13 @@ func Test_FindAllTypes(t *testing.T) {
 			types[1].Fields[4].Type.String() != "LocalType" ||
 			types[1].Fields[4].Tags != nil ||
 			types[1].Fields[4].Type.PackageNameImplied != true ||
-			types[1].Fields[4].Type.Package != "success" {
+			types[1].Fields[4].Type.Package != "success" ||
+			strings.Join(types[1].Fields[5].Comments, "") != "" ||
+			types[1].Fields[5].Name != "ValueB" ||
+			types[1].Fields[5].Type.String() != "*string" ||
+			types[1].Fields[5].Tags != nil ||
+			types[1].Fields[5].Type.PackageNameImplied != false ||
+			types[1].Fields[5].Type.Package != "" {
 			fmt.Println(
 				strings.Join(types[1].Comments, ""), strings.Join(types[1].Comments, "") != "Test comment on TestTypeA", "\n",
 				types[1].FilePath, types[1].FilePath != "internal/success/a.go", "\n",
@@ -276,6 +282,12 @@ func Test_FindAllTypes(t *testing.T) {
 				types[1].Fields[4].Tags, types[1].Fields[4].Tags != nil,
 				types[1].Fields[4].Type.PackageNameImplied, types[1].Fields[4].Type.PackageNameImplied != true,
 				types[1].Fields[4].Type.Package, types[1].Fields[4].Type.Package != "success",
+				strings.Join(types[1].Fields[5].Comments, "") != "", strings.Join(types[1].Fields[5].Comments, ""), "\n",
+				types[1].Fields[5].Name != "ValueB", types[1].Fields[5].Name, "\n",
+				types[1].Fields[5].Type.String() != "*string", types[1].Fields[5].Type.String(), "\n",
+				types[1].Fields[5].Tags != nil, types[1].Fields[5].Tags, "\n",
+				types[1].Fields[5].Type.PackageNameImplied != false, types[1].Fields[5].Type.PackageNameImplied, "\n",
+				types[1].Fields[5].Type.Package != "", types[1].Fields[5].Type.Package,
 			)
 			t.Error("TestTypeA failed expectation")
 		}

@@ -17,6 +17,7 @@ type TestTypeA struct {
 	ComplexTypePointer *bytes.Buffer
 	StringPointer      *LocalType
 	String             LocalType
+	ValueB             *string
 }
 
 type LocalType string

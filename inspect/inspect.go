@@ -286,7 +286,7 @@ func FindAllTypes(root string) (TypeList, error) {
 													ft := FieldType{
 														Package:            impliedPkg,
 														Name:               st.Name,
-														PackageNameImplied: true,
+														PackageNameImplied: impliedPkg != "",
 													}
 
 													fields = append(fields, Field{
@@ -339,7 +339,7 @@ func FindAllTypes(root string) (TypeList, error) {
 															Package:            impliedPkg,
 															Name:               sp.Name,
 															Pointer:            true,
-															PackageNameImplied: true,
+															PackageNameImplied: impliedPkg != "",
 														}
 
 														fields = append(fields, Field{
