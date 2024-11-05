@@ -3,12 +3,12 @@
 
 ## Format
 
-This package defines a toolchain for an annotation format, usable in most Go comments (only type, field and named
-functions are implemented) to allow code generation, meta programming and similar functions, with the source as input,
-in a standardized way.
+This package defines a toolchain for an annotation format, usable in most Go comments (only struct types, their field
+and named functions are implemented) to allow code generation, meta programming and similar functions, with the source
+as input, in a standardized way.
 
-Type documentations, function documentations (including receiver functions) and struct field documentations are being
-considered.
+Struct type documentations, function documentations (including receiver functions) and struct field documentations are
+being considered.
 
 **Example**
 

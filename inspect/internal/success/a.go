@@ -15,6 +15,7 @@ type TestTypeA struct {
 	ValueA             string `literal:tag,json:something`
 	ComplexType        bytes.Buffer
 	ComplexTypePointer *bytes.Buffer
+	StringPointer      *string
 }
 
 func (ttb TestTypeA) AA()  {}
@@ -24,3 +25,12 @@ func ComplicatedFunction() {
 	a := func() {}
 	a()
 }
+
+// test{}
+type TestTypeNotMatching string
+
+// test{}
+type TestTypeNotMatchingPointer *string
+
+// test{}
+type TestTypeNotMatchingTypePointer *bytes.Buffer

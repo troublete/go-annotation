@@ -239,19 +239,34 @@ func FindAllTypes(root string) (TypeList, error) {
 													fields = append(fields, Field{
 														Comments: lines,
 														Name:     f.Names[0].String(),
-														Type:     fmt.Sprintf("%v.%v", set.X.(*ast.Ident).Name, set.Sel.Name),
+														Type:     fmt.Sprintf("%s.%s", set.X.(*ast.Ident).Name, set.Sel.Name),
 														Tags:     tags,
 													})
 												}
 
 												stet, stetok := f.Type.(*ast.StarExpr)
 												if stetok {
-													fields = append(fields, Field{
-														Comments: lines,
-														Name:     f.Names[0].String(),
-														Type:     fmt.Sprintf("*%v.%v", stet.X.(*ast.SelectorExpr).X.(*ast.Ident).Name, stet.X.(*ast.SelectorExpr).Sel.Name),
-														Tags:     tags,
-													})
+													// type pointer
+													tp, tpok := stet.X.(*ast.SelectorExpr)
+													if tpok {
+														fields = append(fields, Field{
+															Comments: lines,
+															Name:     f.Names[0].String(),
+															Type:     fmt.Sprintf("*%s.%s", tp.X.(*ast.Ident).Name, tp.Sel.Name),
+															Tags:     tags,
+														})
+													}
+
+													// scalar pointer
+													sp, spok := stet.X.(*ast.Ident)
+													if spok {
+														fields = append(fields, Field{
+															Comments: lines,
+															Name:     f.Names[0].String(),
+															Type:     fmt.Sprintf("*%s", sp.Name),
+															Tags:     tags,
+														})
+													}
 												}
 											}
 										}
