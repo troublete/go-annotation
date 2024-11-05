@@ -15,8 +15,11 @@ type TestTypeA struct {
 	ValueA             string `literal:tag,json:something`
 	ComplexType        bytes.Buffer
 	ComplexTypePointer *bytes.Buffer
-	StringPointer      *string
+	StringPointer      *LocalType
+	String             LocalType
 }
+
+type LocalType string
 
 func (ttb TestTypeA) AA()  {}
 func (ttb *TestTypeA) AB() {}

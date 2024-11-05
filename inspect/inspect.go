@@ -11,6 +11,33 @@ import (
 	"sync"
 )
 
+var (
+	gotypes = []string{
+		"any",
+		"bool",
+		"byte",
+		"comparable",
+		"complex64",
+		"complex128",
+		"error",
+		"float32",
+		"float64",
+		"int",
+		"int8",
+		"int16",
+		"int32",
+		"int64",
+		"rune",
+		"string",
+		"uint",
+		"uint8",
+		"uint16",
+		"uint32",
+		"uint64",
+		"uintptr",
+	}
+)
+
 type Receiver struct {
 	ReceiverType string `json:"receiver_type"`
 	Pointer      bool   `json:"is_pointer"`
@@ -130,10 +157,35 @@ func (t Type) Doc() []string {
 	return t.Comments
 }
 
+type FieldType struct {
+	Package string `json:"package,omitempty"`
+	Name    string `json:"name"`
+	Pointer bool   `json:"is_pointer"`
+
+	// PackageNameImplied indicates if the package name set is actually read from the
+	// declaration or if it is implied because e.g. the type is defined in the current
+	// package itself; check is done by comparing name of the type with the predeclared
+	// go types
+	PackageNameImplied bool `json:"-"`
+}
+
+func (ft FieldType) String() string {
+	prefix := ""
+	if ft.Pointer {
+		prefix = "*"
+	}
+
+	if ft.Package != "" && !ft.PackageNameImplied {
+		return fmt.Sprintf("%s%s.%s", prefix, ft.Package, ft.Name)
+	}
+
+	return fmt.Sprintf("%s%s", prefix, ft.Name)
+}
+
 type Field struct {
 	Comments []string          `json:"-"`
 	Name     string            `json:"name"`
-	Type     string            `json:"type"`
+	Type     FieldType         `json:"type"`
 	Tags     map[string]string `json:"tags"`
 }
 
@@ -226,10 +278,21 @@ func FindAllTypes(root string) (TypeList, error) {
 
 												st, stok := f.Type.(*ast.Ident)
 												if stok {
+													impliedPkg := ""
+													if !predeclaredName(st.Name) {
+														impliedPkg = pkgname
+													}
+
+													ft := FieldType{
+														Package:            impliedPkg,
+														Name:               st.Name,
+														PackageNameImplied: true,
+													}
+
 													fields = append(fields, Field{
 														Comments: lines,
 														Name:     f.Names[0].String(),
-														Type:     st.Name,
+														Type:     ft,
 														Tags:     tags,
 													})
 												}
@@ -239,8 +302,11 @@ func FindAllTypes(root string) (TypeList, error) {
 													fields = append(fields, Field{
 														Comments: lines,
 														Name:     f.Names[0].String(),
-														Type:     fmt.Sprintf("%s.%s", set.X.(*ast.Ident).Name, set.Sel.Name),
-														Tags:     tags,
+														Type: FieldType{
+															Package: set.X.(*ast.Ident).Name,
+															Name:    set.Sel.Name,
+														},
+														Tags: tags,
 													})
 												}
 
@@ -252,18 +318,34 @@ func FindAllTypes(root string) (TypeList, error) {
 														fields = append(fields, Field{
 															Comments: lines,
 															Name:     f.Names[0].String(),
-															Type:     fmt.Sprintf("*%s.%s", tp.X.(*ast.Ident).Name, tp.Sel.Name),
-															Tags:     tags,
+															Type: FieldType{
+																Package: tp.X.(*ast.Ident).Name,
+																Name:    tp.Sel.Name,
+																Pointer: true,
+															},
+															Tags: tags,
 														})
 													}
 
 													// scalar pointer
 													sp, spok := stet.X.(*ast.Ident)
 													if spok {
+														impliedPkg := ""
+														if !predeclaredName(sp.Name) {
+															impliedPkg = pkgname
+														}
+
+														ft := FieldType{
+															Package:            impliedPkg,
+															Name:               sp.Name,
+															Pointer:            true,
+															PackageNameImplied: true,
+														}
+
 														fields = append(fields, Field{
 															Comments: lines,
 															Name:     f.Names[0].String(),
-															Type:     fmt.Sprintf("*%s", sp.Name),
+															Type:     ft,
 															Tags:     tags,
 														})
 													}
@@ -292,4 +374,13 @@ func FindAllTypes(root string) (TypeList, error) {
 	}
 	wg.Wait()
 	return results, nil
+}
+
+func predeclaredName(n string) bool {
+	for _, t := range gotypes {
+		if n == t {
+			return true
+		}
+	}
+	return false
 }
