@@ -8,7 +8,8 @@ and named functions are implemented) to allow code generation, meta programming 
 as input, in a standardized way.
 
 Struct type documentations, function documentations (including receiver functions) and struct field documentations are
-being considered.
+being considered. The library doesn't support yet slice or map types; but you can create a custom type to 'wrap' things
+like this.
 
 **Example**
 
